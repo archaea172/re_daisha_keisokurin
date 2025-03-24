@@ -245,7 +245,8 @@ int main(void)
 
 	  }
 	  else if (MOVE_STATE == state) {
-
+		  printf("%f %f %f", x, y, theta);
+		  HAL_Delay(10);
 	  }
 	  HAL_Delay(10);
     /* USER CODE END WHILE */
