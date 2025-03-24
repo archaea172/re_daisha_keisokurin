@@ -63,8 +63,6 @@ void Error_Handler(void);
 #define ENC1_B_GPIO_Port GPIOA
 #define ENC3_A_Pin GPIO_PIN_2
 #define ENC3_A_GPIO_Port GPIOB
-#define ENC3_X_Pin GPIO_PIN_12
-#define ENC3_X_GPIO_Port GPIOB
 #define ENC3_B_Pin GPIO_PIN_12
 #define ENC3_B_GPIO_Port GPIOC
 #define Board_LED_Pin GPIO_PIN_2

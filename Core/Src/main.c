@@ -30,7 +30,7 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 typedef struct {
-	volatile int32_t pulse;
+	volatile int16_t pulse;
 	volatile float vel;//rad/s
 }Encoder;
 /* USER CODE END PTD */
@@ -86,7 +86,7 @@ int8_t sub_state;
 float32_t RxData_f32[16] = {};
 uint32_t CANID_R = 0;
 
-volatile float x = 0, y = -200;//mm
+volatile float x = 0, y = 0;//mm
 volatile float theta = 0;//rad
 
 volatile float vx = 0, vy = 0;//m/s
@@ -94,7 +94,7 @@ volatile float omega = 0;//rad
 
 Encoder encoder[3] = {};
 
-int8_t flag_cal = 0;
+int8_t flag_cal = 1;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -155,7 +155,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		}
 	}
 	else if (&htim16 == htim) {
-		float dt = 0.001;
+		float dt = 0.001;//s
 		float ppr[3] = {1000, 1000, 1000};
 		for (int i = 0; i < 3; i++) {
 			encoder[i].pulse = read_encoder_value(i);
@@ -232,6 +232,9 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim6);
   HAL_TIM_Base_Start_IT(&htim7);
   HAL_TIM_Base_Start_IT(&htim16);
+  HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
+  HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);
+  HAL_TIM_Encoder_Start(&htim5, TIM_CHANNEL_ALL);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -239,15 +242,16 @@ int main(void)
   while (1)
   {
 	  if (ERROR_STATE == state) {
-
+		  state = MOVE_STATE;
 	  }
 	  else if (INITIALIZE_STATE == state) {
 
 	  }
 	  else if (MOVE_STATE == state) {
-		  printf("%f %f %f", x, y, theta);
-		  HAL_Delay(10);
+		  printf("%f %f %f\r\n", x, y, theta);
+		  //for (int i = 0; i < 3; i++) printf("%d ", encoder[i].pulse);
 	  }
+	  printf("\r\n");
 	  HAL_Delay(10);
     /* USER CODE END WHILE */
 
@@ -414,7 +418,7 @@ static void MX_TIM2_Init(void)
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 0;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 4294967295;
+  htim2.Init.Period = 65535;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   sConfig.EncoderMode = TIM_ENCODERMODE_TI1;
@@ -505,7 +509,6 @@ static void MX_TIM5_Init(void)
 
   TIM_Encoder_InitTypeDef sConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
-  TIMEx_EncoderIndexConfigTypeDef sEncoderIndexConfig = {0};
 
   /* USER CODE BEGIN TIM5_Init 1 */
 
@@ -513,7 +516,7 @@ static void MX_TIM5_Init(void)
   htim5.Instance = TIM5;
   htim5.Init.Prescaler = 0;
   htim5.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim5.Init.Period = 4294967295;
+  htim5.Init.Period = 65535;
   htim5.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim5.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   sConfig.EncoderMode = TIM_ENCODERMODE_TI1;
@@ -532,16 +535,6 @@ static void MX_TIM5_Init(void)
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
   if (HAL_TIMEx_MasterConfigSynchronization(&htim5, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sEncoderIndexConfig.Polarity = TIM_ENCODERINDEX_POLARITY_NONINVERTED;
-  sEncoderIndexConfig.Prescaler = TIM_ENCODERINDEX_PRESCALER_DIV1;
-  sEncoderIndexConfig.Filter = 0;
-  sEncoderIndexConfig.FirstIndexEnable = DISABLE;
-  sEncoderIndexConfig.Position = TIM_ENCODERINDEX_POSITION_00;
-  sEncoderIndexConfig.Direction = TIM_ENCODERINDEX_DIRECTION_UP_DOWN;
-  if (HAL_TIMEx_ConfigEncoderIndex(&htim5, &sEncoderIndexConfig) != HAL_OK)
   {
     Error_Handler();
   }
@@ -789,6 +782,8 @@ int16_t read_encoder_value(int16_t num) {
 			  enc_buff = TIM5->CNT;
 			  TIM5->CNT = 0;
 			  break;
+		  default:
+			  return 0;
 	  }
 
 	  if (enc_buff > 0x8fffffff)
