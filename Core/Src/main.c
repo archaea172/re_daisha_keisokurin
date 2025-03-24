@@ -42,7 +42,7 @@
 #define STATE_CANID_P_DOWN 0x100
 #define STATE_CANID_P_UP 0x101
 
-#define ID 0
+#define ID 2
 
 #define STATE_CANID_DOWN STATE_CANID_P_DOWN + (ID*16)
 #define STATE_CANID_UP STATE_CANID_P_UP + (ID*16)
