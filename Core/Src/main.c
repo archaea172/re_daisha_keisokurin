@@ -171,9 +171,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			theta += v_v[2] * dt	;
 		}
 		else {
-			x 	  += (vx + v_v[0])/2*dt;
-			y 	  += (vy + v_v[1])/2*dt;
-			theta += (vx + v_v[2])/2*dt;
+			x 	  += (vx 	+ v_v[0])/2*dt;
+			y 	  += (vy 	+ v_v[1])/2*dt;
+			theta += (omega + v_v[2])/2*dt;
 		}
 		vx 	  = v_v[0];
 		vy 	  = v_v[1];
