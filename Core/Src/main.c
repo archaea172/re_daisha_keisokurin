@@ -52,6 +52,9 @@ typedef struct {
 #define STATE_CANID_DOWN STATE_CANID_P_DOWN + (ID*16)
 #define STATE_CANID_UP STATE_CANID_P_UP + (ID*16)
 
+#define ODOMETRY_SENSOR_SENSOR 0x200
+#define VELOCITY_SENSOR 0x201
+
 #define r 60//mm
 #define R 144//mm
 /* USER CODE END PD */
@@ -116,6 +119,8 @@ void interboard_comms_CAN_RxTxSettings_nhk2025_init(void);
 
 int16_t read_encoder_value(int16_t num);
 void vel_calc(float Theta, float w1, float w2, float w3, float *Vx, float *Vy, float *Omega);
+void zahyo_CAN(float X, float Y, float Theta);
+void vel_CAN(float Vx, float Vy, float Omega);
 
 /* USER CODE END PFP */
 
@@ -826,6 +831,20 @@ void vel_calc(float Theta, float w1, float w2, float w3, float *Vx, float *Vy, f
 	*Vx =    r*(a_in[0][0]*w[0] + a_in[0][1]*w[1] + a_in[0][2]*w[2])/2;
 	*Vy =    r*(a_in[1][0]*w[0] + a_in[1][1]*w[1] + a_in[1][2]*w[2])/2;
 	*Omega = r*(a_in[2][0]*w[0] + a_in[2][1]*w[1] + a_in[2][2]*w[2])/2;
+}
+void zahyo_CAN(float X, float Y, float Theta) {
+	float32_t Txdata[16]  = {};
+	Txdata[0] = X;
+	Txdata[1] = Y;
+	Txdata[2] = Theta;
+	CAN(ODOMETRY_SENSOR_SENSOR, Txdata);
+}
+void vel_CAN(float Vx, float Vy, float Omega) {
+	float32_t Txdata[16]  = {};
+	Txdata[0] = Vx;
+	Txdata[1] = Vy;
+	Txdata[2] = Omega;
+	CAN(VELOCITY_SENSOR, Txdata);
 }
 /* USER CODE END 4 */
 
