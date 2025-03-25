@@ -86,9 +86,6 @@ FDCAN_RxHeaderTypeDef RxHeader;
 int8_t state = ERROR_STATE;
 int8_t sub_state;
 
-float32_t RxData_f32[16] = {};
-uint32_t CANID_R = 0;
-
 volatile float x = 0, y = 0;//mm
 volatile float theta = 0;//rad
 
@@ -135,10 +132,17 @@ void HAL_FDCAN_RxFifo1Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo1ITs)
 			printf("fdcan_getrxmessage is error\r\n");
 			Error_Handler();
 		}
-
+		float32_t RxData_f32[16] = {};
 		convert_u8_f32(RxData, RxData_f32);
 
-		CANID_R = RxHeader.Identifier;
+		if (STATE_CANID_DOWN == RxHeader.Identifier) {
+			if (INITIALIZE_STATE == RxData_f32[0]) {
+				state = RxData_f32[0];
+			}
+			else if (ERROR_STATE == RxData_f32[0]) {
+				state = RxData_f32[0];
+			}
+		}
 	}
 }
 
@@ -150,14 +154,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		CAN(STATE_CANID_UP, TxData_f32);
 	}
 	else if (&htim7 == htim) {
-		if (STATE_CANID_DOWN == CANID_R) {
-			if (INITIALIZE_STATE == RxData_f32[0]) {
-				state = RxData_f32[0];
-			}
-			else if (ERROR_STATE == RxData_f32[0]) {
-				state = RxData_f32[0];
-			}
-		}
+
 	}
 	else if (&htim16 == htim) {
 		float dt = 0.001;//s
