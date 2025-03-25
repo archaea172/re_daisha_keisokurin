@@ -255,6 +255,8 @@ int main(void)
 	  else if (MOVE_STATE == state) {
 		  printf("%f %f %f\r\n", x, y, theta);
 		  //for (int i = 0; i < 3; i++) printf("%d ", encoder[i].pulse);
+		  zahyo_CAN(x, y, theta);
+		  vel_CAN(vx, vy, omega);
 	  }
 	  printf("\r\n");
 	  HAL_Delay(10);
